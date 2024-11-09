@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>To-Do List</title>
+  <style>
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    table, th, td {
+      border: 1px solid black;
+    }
+    th, td {
+      padding: 10px;
+      text-align: left;
+    }
+    #todoForm {
+      display: flex;
+      flex-direction: column;
+    }
+    form label {
+      font-size: large;
+    }
+    form input {
+      padding: 4px;
+      border-radius: 2px;
+      cursor: text;
+    }
+    form button {
+      padding: 5px 10px;
+      cursor: pointer;
+    }
+    #todoTable {
+      width: 100%;
+    }
+    body {
+      background-color: whitesmoke;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    #frm {
+      max-width: 700px;
+      margin: 0 10vw;
+      width: 80%;
+      background-color: rgb(146, 187, 223);
+      padding: 20px;
+      border-radius: 5px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    #tble {
+      max-width: 700px;
+      margin: 0 10vw;
+      width: 80%;
+      background-color: aliceblue;
+      padding: 20px;
+      border-radius: 5px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      margin-top: 20px;
+    }
+    .action-buttons {
+      display: flex;
+      gap: 10px;
+    }
+    .action-buttons button {
+      padding: 5px 10px;
+      cursor: pointer;
+    }
+    button {
+      font-size: medium;
+      color: white;
+      background-color: dodgerblue;
+      border-radius: 3px;
+      border: 1px solid white;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      text-align: center;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="frm">
+    <h1>To-Do List</h1>
+    <form id="todoForm">
+      <label for="task">Task:</label>
+      <input type="text" id="task" required><br><br>
+      <label for="description">Description:</label>
+      <input type="text" id="description" required><br><br>
+      <label for="dueDate">Due Date:</label>
+      <input type="date" id="dueDate" required><br><br>
+      <button type="submit">Add Task</button>
+    </form>
+  </div>
+
+  <div id="tble">
+    <h2>Your Tasks</h2>
+    <table id="todoTable">
+      <thead>
+        <tr>
+          <th>Task</th>
+          <th>Description</th>
+          <th>Due Date</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <script>
+    document.getElementById('todoForm').addEventListener('submit', function(event) {
+      event.preventDefault();
+
+      const task = document.getElementById('task').value;
+      const description = document.getElementById('description').value;
+      const dueDate = document.getElementById('dueDate').value;
+
+      const todoRecord = { task, description, dueDate };
+
+      let todoData = JSON.parse(localStorage.getItem('todoData')) || [];
+      todoData.push(todoRecord);
+      localStorage.setItem('todoData', JSON.stringify(todoData));
+
+      displayTodoRecords();
+      this.reset();
+    });
+
+    function displayTodoRecords() {
+      const todoData = JSON.parse(localStorage.getItem('todoData')) || [];
+      const tbody = document.getElementById('todoTable').getElementsByTagName('tbody')[0];
+      tbody.innerHTML = '';
+
+      todoData.forEach((record, index) => {
+        const row = tbody.insertRow();
+        const taskCell = row.insertCell(0);
+        const descriptionCell = row.insertCell(1);
+        const dueDateCell = row.insertCell(2);
+        const actionsCell = row.insertCell(3);
+
+        taskCell.textContent = record.task;
+        descriptionCell.textContent = record.description;
+        dueDateCell.textContent = record.dueDate;
+
+        const markDoneButton = document.createElement('button');
+        markDoneButton.textContent = 'Mark as Done';
+        markDoneButton.addEventListener('click', () => markAsDone(index));
+        markDoneButton.style.backgroundColor = 'green';
+
+        const editButton = document.createElement('button');
+        editButton.textContent = 'Edit Task';
+        editButton.addEventListener('click', () => editTask(index));
+        editButton.style.backgroundColor = 'orange';
+
+        const actionButtons = document.createElement('div');
+        actionButtons.classList.add('action-buttons');
+        actionButtons.appendChild(markDoneButton);
+        actionButtons.appendChild(editButton);
+
+        actionsCell.appendChild(actionButtons);
+      });
+    }
+
+    function markAsDone(index) {
+      let todoData = JSON.parse(localStorage.getItem('todoData')) || [];
+      todoData.splice(index, 1);
+      localStorage.setItem('todoData', JSON.stringify(todoData));
+      displayTodoRecords();
+    }
+
+    function editTask(index) {
+      let todoData = JSON.parse(localStorage.getItem('todoData')) || [];
+      const task = prompt('Edit Task:', todoData[index].task);
+      const description = prompt('Edit Description:', todoData[index].description);
+      const dueDate = prompt('Edit Due Date:', todoData[index].dueDate);
+
+      if (task && description && dueDate) {
+        todoData[index].task = task;
+        todoData[index].description = description;
+        todoData[index].dueDate = dueDate;
+        localStorage.setItem('todoData', JSON.stringify(todoData));
+        displayTodoRecords();
+      }
+    }
+
+    displayTodoRecords();
+  </script>
+</body>
+</html>
